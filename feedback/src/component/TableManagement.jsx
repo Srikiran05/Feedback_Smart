@@ -23,7 +23,7 @@ const TableManagement = () => {
 
             const formatted = backendTables.map((table) => ({
                 ...table,
-                qrCode: `/qrcodes/table-${table.id}.jpeg`,
+                qrCode: `/qrcodes/table-${table.id}.png`,
             }));
 
             setTables(formatted);

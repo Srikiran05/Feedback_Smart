@@ -18,7 +18,7 @@ const TableManagement = () => {
         try {
             setLoading(true);
             setError('');
-            const response = await axios.get('http://192.168.0.102:5000/api/tables');
+            const response = await axios.get('http://192.168.0.103:5000/api/tables');
             const backendTables = response.data;
 
             const formatted = backendTables.map((table) => ({
@@ -45,7 +45,7 @@ const TableManagement = () => {
         };
 
         try {
-            await axios.post('http://192.168.0.102:5000/api/tables', newTableData);
+            await axios.post('http://192.168.0.103:5000/api/tables', newTableData);
             fetchTables();
             setNewTable({ id: '', location: '', capacity: '' });
             setShowAddModal(false);
@@ -58,7 +58,7 @@ const TableManagement = () => {
     const handleDeleteTable = async (tableId) => {
         if (window.confirm('Are you sure you want to delete this table?')) {
             try {
-                await axios.delete(`http://192.168.0.102:5000/api/tables/${tableId}`);
+                await axios.delete(`http://192.168.0.103:5000/api/tables/${tableId}`);
                 fetchTables();
             } catch (err) {
                 console.error('Error deleting table:', err);

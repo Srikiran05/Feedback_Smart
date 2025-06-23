@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-const mongoURL = 'mongodb+srv://<your_username>:<your_pass_for_atlas>@cluster0.wbkiev2.mongodb.net/?retryWrites=true&w=majority';
+const mongoURL = 'mongodb+srv://malladisrikiran:osd0cU9gGSgS9Rl0@cluster0.wbkiev2.mongodb.net/?retryWrites=true&w=majority';
 mongoose.connect(mongoURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

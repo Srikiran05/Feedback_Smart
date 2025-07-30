@@ -4,14 +4,13 @@ const mongoose = require('mongoose');
 const feedbackRoutes = require('./routes');
 
 const app = express();
-const port = 5000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-const mongoURL = 'mongodb+srv://<username>:<password>@cluster0.wbkiev2.mongodb.net/?retryWrites=true&w=majority';
+const mongoURL = process.env.MONGODB_URL || 'mongodb+srv://<username>:<password>@cluster0.wbkiev2.mongodb.net/?retryWrites=true&w=majority';
 mongoose.connect(mongoURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -93,10 +92,39 @@ app.post('/api/feedback', async (req, res) => {
     }
 });
 
+// Add analytics route
+app.get('/api/analytics', async (req, res) => {
+    try {
+        const allFeedbacks = await Feedback.find();
+        const totalFeedbacks = allFeedbacks.length;
+        const avgRating = totalFeedbacks > 0
+            ? allFeedbacks.reduce((sum, f) => sum + (f.averageRating || 0), 0) / totalFeedbacks
+            : 0;
+        const responsesToday = await Feedback.countDocuments({
+            timestamp: {
+                $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                $lte: new Date(new Date().setHours(23, 59, 59, 999)),
+            },
+        });
+
+        res.json({
+            total_feedbacks: totalFeedbacks,
+            average_rating: parseFloat(avgRating.toFixed(1)),
+            responses_today: responsesToday,
+        });
+    } catch (err) {
+        console.error('Error fetching analytics:', err);
+        res.status(500).json({ error: 'Failed to fetch analytics data' });
+    }
+});
+
 // Other feedback routes (if defined in routes/)
 app.use('/api', feedbackRoutes);
 
-// Start server
-app.listen(port, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${port}`);
+// Start server with dynamic port for Render.com
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
+}).on('error', (err) => {
+    console.error('Server startup error:', err);
 });

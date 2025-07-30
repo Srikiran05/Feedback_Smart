@@ -26,7 +26,7 @@ const Dashboard = () => {
 
     const fetchDashboardData = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/analytics');
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`);
             const data = response.data;
 
             const totalFeedbacks = data.total_feedbacks || 0;

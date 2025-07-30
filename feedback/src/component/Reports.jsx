@@ -23,7 +23,7 @@ const Reports = () => {
 
     const fetchAnalyticsData = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/analytics');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`);
             const data = res.data;
 
             const trends = data.feedback_counts.map((count, index) => ({

@@ -103,7 +103,8 @@ const FeedbackForm = () => {
 
         try {
             console.log('Submitting feedback:', payload);
-            const response = await axios.post('http://192.168.0.102:5000/api/feedback', payload, {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/feedback`, payload, {
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 10000,
             });

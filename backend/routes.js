@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { submitFeedback, getFeedbackAnalytics } = require('./controllers');
-const Feedback = require('../models/Feedback'); // Adjust path to your Feedback model
+const { Feedback } = require('./schemas');
 
 // Static table list (if still used)
 const TABLES = [

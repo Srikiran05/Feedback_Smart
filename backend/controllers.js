@@ -2,51 +2,62 @@ const Feedback = require('./schemas');
 const axios = require('axios');
 
 // Ollama API interaction
+// async function analyzeFeedback(feedback, ratings) {
+//     try {
+//         const prompt = `
+// You are an AI tasked with analyzing customer feedback and ratings for a service. 
+// Given the following:
+// - Feedback: "${feedback}"
+// - Ratings: ${JSON.stringify(ratings)}
+
+// Provide a response in JSON format with the following structure:
+// {
+//   "sentiment": "positive/neutral/negative",
+//   "summary": "A concise summary of the feedback",
+//   "actionableInsights": ["Insight 1", "Insight 2", ...]
+// }
+
+// The actionable insights should be specific, quantifiable suggestions based on the feedback text and ratings, e.g., "20% want quieter music", "35% recommend more vegan options".
+// Ensure the response is valid JSON without Markdown formatting (e.g., no \`\`\`json markers).
+// `;
+
+//         const response = await axios.post('http://localhost:11434/api/generate', {
+//             model: 'llama3.2:1b',
+//             prompt: prompt,
+//             stream: false,
+//         });
+
+//         // Log raw response for debugging
+//         console.log('Ollama raw response:', response.data.response);
+
+//         // Strip Markdown and whitespace
+//         let jsonString = response.data.response;
+//         jsonString = jsonString.replace(/```json\n?/, '').replace(/```\n?/, '').trim();
+
+//         // Parse JSON
+//         const parsedResponse = JSON.parse(jsonString);
+//         console.log('Parsed Ollama response:', parsedResponse);
+
+//         return parsedResponse;
+//     } catch (error) {
+//         console.error('Error analyzing feedback with Ollama:', error.message, error.stack);
+//         return {
+//             sentiment: 'neutral',
+//             summary: 'Unable to analyze feedback due to an error.',
+//             actionableInsights: [],
+//         };
+//     }
+// }
+
+
+
 async function analyzeFeedback(feedback, ratings) {
-    try {
-        const prompt = `
-You are an AI tasked with analyzing customer feedback and ratings for a service. 
-Given the following:
-- Feedback: "${feedback}"
-- Ratings: ${JSON.stringify(ratings)}
-
-Provide a response in JSON format with the following structure:
-{
-  "sentiment": "positive/neutral/negative",
-  "summary": "A concise summary of the feedback",
-  "actionableInsights": ["Insight 1", "Insight 2", ...]
-}
-
-The actionable insights should be specific, quantifiable suggestions based on the feedback text and ratings, e.g., "20% want quieter music", "35% recommend more vegan options".
-Ensure the response is valid JSON without Markdown formatting (e.g., no \`\`\`json markers).
-`;
-
-        const response = await axios.post('http://localhost:11434/api/generate', {
-            model: 'llama3.2:1b',
-            prompt: prompt,
-            stream: false,
-        });
-
-        // Log raw response for debugging
-        console.log('Ollama raw response:', response.data.response);
-
-        // Strip Markdown and whitespace
-        let jsonString = response.data.response;
-        jsonString = jsonString.replace(/```json\n?/, '').replace(/```\n?/, '').trim();
-
-        // Parse JSON
-        const parsedResponse = JSON.parse(jsonString);
-        console.log('Parsed Ollama response:', parsedResponse);
-
-        return parsedResponse;
-    } catch (error) {
-        console.error('Error analyzing feedback with Ollama:', error.message, error.stack);
-        return {
-            sentiment: 'neutral',
-            summary: 'Unable to analyze feedback due to an error.',
-            actionableInsights: [],
-        };
-    }
+    console.log('Ollama analysis skipped in production');
+    return {
+        sentiment: 'neutral',
+        summary: 'Analysis disabled in production',
+        actionableInsights: [],
+    };
 }
 
 // Submit feedback

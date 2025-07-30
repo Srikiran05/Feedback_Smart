@@ -18,7 +18,7 @@ const Dashboard = () => {
     const [categoryMetricData, setCategoryMetricData] = useState([]);
     const [sentimentTableData, setSentimentTableData] = useState({});
     const [actualCategoryMentions, setActualCategoryMentions] = useState({});
-    const [bar2YAxisMax, setBar2YAxisMax] = useState(10);
+    const [bar2YAxisMax, setBar2YAxisMax] = useState(5);
 
     useEffect(() => {
         fetchDashboardData();
@@ -49,7 +49,7 @@ const Dashboard = () => {
                     name: cat.charAt(0).toUpperCase() + cat.slice(1),
                     metric:
                         data.feedback_counts?.[index] > 0
-                            ? (data.total_ratings?.[index] / data.feedback_counts[index]).toFixed(1)
+                            ? parseFloat((data.total_ratings?.[index] / data.feedback_counts[index]).toFixed(1))
                             : 0,
                 }))
             );
@@ -82,8 +82,14 @@ const Dashboard = () => {
             setSentimentTableData(sentimentData);
             setActualCategoryMentions(mentionCounter);
 
-            const bar2Max = Object.values(mentionCounter).reduce((a, b) => a + b, 0);
-            setBar2YAxisMax(bar2Max > 0 ? bar2Max : 10);
+            const bar2Max = Math.max(...CATEGORIES.map((cat, index) => {
+                if (data.feedback_counts?.[index] > 0) {
+                    return parseFloat((data.total_ratings?.[index] / data.feedback_counts[index]).toFixed(1));
+                }
+                return 0;
+            })) + 1;
+
+            setBar2YAxisMax(bar2Max);
         } catch (error) {
             console.error('Error fetching dashboard data:', error.message);
         }

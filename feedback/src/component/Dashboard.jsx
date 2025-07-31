@@ -5,7 +5,7 @@ import {
 import { Coffee, MessageSquare, Star, Users } from 'lucide-react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
-import { CATEGORIES, SENTIMENT_STRING } from '../constants';
+import { CATEGORY, SENTIMENT_STRING } from '../constants';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -42,7 +42,7 @@ const Dashboard = () => {
 
             // Ensure CATEGORIES matches backend order (ambience, cleanliness, taste, service, value)
             setCategoryFeedbackData(
-                CATEGORIES.map((cat, index) => ({
+                CATEGORY.map((cat, index) => ({
                     name: cat.charAt(0).toUpperCase() + cat.slice(1),
                     feedback: data.feedback_counts?.[index] || 0,
                 }))
@@ -50,7 +50,7 @@ const Dashboard = () => {
             console.log('Category Feedback Data:', categoryFeedbackData);
 
             setCategoryMetricData(
-                CATEGORIES.map((cat, index) => ({
+                CATEGORY.map((cat, index) => ({
                     name: cat.charAt(0).toUpperCase() + cat.slice(1),
                     metric:
                         data.feedback_counts?.[index] > 0
@@ -63,13 +63,13 @@ const Dashboard = () => {
             const sentimentData = {};
             const mentionCounter = {};
 
-            CATEGORIES.forEach((cat) => {
+            CATEGORY.forEach((cat) => {
                 sentimentData[cat] = { worst: 0, average: 0, excellent: 0 };
                 mentionCounter[cat] = 0;
             });
 
             Object.values(data.table_breakdown || {}).forEach((table) => {
-                CATEGORIES.forEach((cat) => {
+                CATEGORY.forEach((cat) => {
                     if (table[cat]) {
                         sentimentData[cat].worst += table[cat].worst || 0;
                         sentimentData[cat].average += table[cat].average || 0;
@@ -91,7 +91,7 @@ const Dashboard = () => {
             setSentimentTableData(sentimentData);
             setActualCategoryMentions(mentionCounter);
 
-            const bar2Max = Math.max(...CATEGORIES.map((cat, index) => {
+            const bar2Max = Math.max(...CATEGORY.map((cat, index) => {
                 if (data.feedback_counts?.[index] > 0) {
                     return parseFloat((data.total_ratings?.[index] / data.feedback_counts[index]).toFixed(1));
                 }

@@ -158,6 +158,7 @@ const Dashboard = () => {
                                     <th key={label}>{label}</th>
                                 ))}
                                 <th>Sentiment Score</th>
+                                <th>Visual</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -168,6 +169,10 @@ const Dashboard = () => {
                                 const exc = sent.excellent || 0;
                                 const total = worst + avg + exc || 1;
                                 const score = Math.round(((worst * 1 + avg * 2 + exc * 3) / total) / 3 * 100);
+                                const worstPct = (worst / total) * 100;
+                                const avgPct = (avg / total) * 100;
+                                const excPct = (exc / total) * 100;
+
                                 return (
                                     <tr key={cat}>
                                         <td>{cat.charAt(0).toUpperCase() + cat.slice(1)}</td>
@@ -175,12 +180,20 @@ const Dashboard = () => {
                                         <td>{avg}</td>
                                         <td>{exc}</td>
                                         <td>{score}%</td>
+                                        <td style={{ width: "25%" }}>
+                                            <div style={{ display: "flex", height: "10px", width: "100%", borderRadius: "4px", overflow: "hidden", backgroundColor: "#e5e7eb" }}>
+                                                <div style={{ width: `${worstPct}%`, backgroundColor: "#ef4444" }}></div>
+                                                <div style={{ width: `${avgPct}%`, backgroundColor: "#facc15" }}></div>
+                                                <div style={{ width: `${excPct}%`, backgroundColor: "#10b981" }}></div>
+                                            </div>
+                                        </td>
                                     </tr>
                                 );
                             })}
                         </tbody>
                     </table>
                 </div>
+
             </main>
         </div>
     );

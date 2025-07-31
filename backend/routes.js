@@ -3,7 +3,7 @@ const router = express.Router();
 const { submitFeedback, getFeedbackAnalytics } = require('./controllers');
 const { Feedback } = require('./schemas');
 
-// Static table list (if still used)
+// Static table list
 const TABLES = [
     { id: '1', location: 'Window Side', capacity: 4 },
     { id: '2', location: 'Center', capacity: 2 },
@@ -14,21 +14,10 @@ const TABLES = [
 ];
 
 router.post('/feedback', submitFeedback);
-router.get('/analytics', async (req, res) => {
-    try {
-        const feedbacks = await Feedback.find();
-        const tableCounts = {};
 
-        feedbacks.forEach(fb => {
-            const tableId = fb.tableId || 'unknown';
-            tableCounts[tableId] = (tableCounts[tableId] || 0) + 1;
-        });
+// ✅ Fix: use actual analytics controller and correct route
+router.get('/feedback/analytics', getFeedbackAnalytics);
 
-        res.json({ tableCounts, feedbackData: feedbacks });
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch analytics data' });
-    }
-});
 router.get('/tables', async (req, res) => {
     try {
         const results = await Promise.all(TABLES.map(async (table) => {

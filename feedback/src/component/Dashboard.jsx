@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Sidebar from './Sidebar';
-import './App.css';
+import '../App.css';
 
 const BACKEND_URL = import.meta.env.VITE_API_URL;
 const CATEGORY = ['service', 'food', 'cleanliness', 'ambience'];

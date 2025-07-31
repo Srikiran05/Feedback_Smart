@@ -45,8 +45,6 @@ const Dashboard = () => {
 
             const totalFeedbacks = data.total_feedbacks || 0;
             console.log('Total Feedbacks:', totalFeedbacks);
-            console.log('Average rating:', average_rating);
-            console.log('Total responses:', responses_today);
 
             setStats({
                 total_feedbacks: totalFeedbacks,

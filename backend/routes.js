@@ -14,8 +14,21 @@ const TABLES = [
 ];
 
 router.post('/feedback', submitFeedback);
-router.get('/analytics', getFeedbackAnalytics);
+router.get('/analytics', async (req, res) => {
+    try {
+        const feedbacks = await Feedback.find();
+        const tableCounts = {};
 
+        feedbacks.forEach(fb => {
+            const tableId = fb.tableId || 'unknown';
+            tableCounts[tableId] = (tableCounts[tableId] || 0) + 1;
+        });
+
+        res.json({ tableCounts, feedbackData: feedbacks });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch analytics data' });
+    }
+});
 router.get('/tables', async (req, res) => {
     try {
         const results = await Promise.all(TABLES.map(async (table) => {

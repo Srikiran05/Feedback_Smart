@@ -24,6 +24,19 @@ const Dashboard = () => {
         fetchDashboardData();
     }, []);
 
+    // Add these useEffects to log data after state updates
+    useEffect(() => {
+        console.log('Category Feedback Data updated:', categoryFeedbackData);
+    }, [categoryFeedbackData]);
+
+    useEffect(() => {
+        console.log('Category Metric Data updated:', categoryMetricData);
+    }, [categoryMetricData]);
+
+    useEffect(() => {
+        console.log('Sentiment Table Data updated:', sentimentTableData);
+    }, [sentimentTableData]);
+
     const fetchDashboardData = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`);
@@ -38,17 +51,17 @@ const Dashboard = () => {
                 average_rating: parseFloat(data.average_rating) || 0,
                 responses_today: data.responses_today || 0,
             });
-            console.log('Stats Set:', stats);
+            // No need to log stats immediately here, useEffect can log if desired
 
-            // Ensure CATEGORIES matches backend order (ambience, cleanliness, taste, service, value)
+            // Map feedback counts to categoryFeedbackData
             setCategoryFeedbackData(
                 CATEGORY.map((cat, index) => ({
                     name: cat.charAt(0).toUpperCase() + cat.slice(1),
                     feedback: data.feedback_counts?.[index] || 0,
                 }))
             );
-            console.log('Category Feedback Data:', categoryFeedbackData);
 
+            // Map average ratings per category to categoryMetricData
             setCategoryMetricData(
                 CATEGORY.map((cat, index) => ({
                     name: cat.charAt(0).toUpperCase() + cat.slice(1),
@@ -58,8 +71,8 @@ const Dashboard = () => {
                             : 0,
                 }))
             );
-            console.log('Category Metric Data:', categoryMetricData);
 
+            // Prepare sentiment summary table data
             const sentimentData = {};
             const mentionCounter = {};
 
@@ -85,19 +98,18 @@ const Dashboard = () => {
                 });
             });
 
-            console.log('Sentiment Data:', sentimentData);
-            console.log('Mention Counter:', mentionCounter);
-
             setSentimentTableData(sentimentData);
             setActualCategoryMentions(mentionCounter);
 
+            // Calculate max Y-axis for average rating bar chart
             const bar2Max = Math.max(...CATEGORY.map((cat, index) => {
                 if (data.feedback_counts?.[index] > 0) {
                     return parseFloat((data.total_ratings?.[index] / data.feedback_counts[index]).toFixed(1));
                 }
                 return 0;
             })) + 1;
-            setBar2YAxisMax(bar2Max > 5 ? bar2Max : 5); // Ensure minimum range
+
+            setBar2YAxisMax(bar2Max > 5 ? bar2Max : 5); // Minimum range 5
         } catch (error) {
             console.error('Error fetching dashboard data:', error.message, error.stack);
         }

@@ -123,20 +123,20 @@ const Dashboard = () => {
                 <div className="charts-row">
                     <div className="chart-box">
                         <h3>Feedback by Category</h3>
-                        <ResponsiveContainer width="100%" height={300}>
+                        <ResponsiveContainer width="70%" height={300}>
                             <BarChart data={categoryFeedbackData}>
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={50} />
                                 <YAxis />
                                 <Tooltip />
-                                <Bar dataKey="feedback" fill="#8B4513" />
+                                <Bar dataKey="feedback" fill="#8B4513" barSize={25} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
 
                     <div className="chart-box">
                         <h3>Average Rating by Category</h3>
-                        <ResponsiveContainer width="100%" height={300}>
+                        <ResponsiveContainer width="70%" height={300}>
                             <BarChart data={categoryMetricData}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />

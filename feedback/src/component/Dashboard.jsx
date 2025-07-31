@@ -1,148 +1,82 @@
-// Keep this version saved as final working base
-import React, { useState, useEffect } from 'react';
-import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from 'recharts';
-import { MessageSquare, Star, Users } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Sidebar from './Sidebar';
-import { CATEGORY, SENTIMENT_STRING } from '../constants';
+import './App.css';
+
+const BACKEND_URL = import.meta.env.VITE_API_URL;
+const CATEGORY = ['service', 'food', 'cleanliness', 'ambience'];
+const sentimentLabels = { worst: 'Worst', average: 'Average', excellent: 'Excellent' };
 
 const Dashboard = () => {
-    const [stats, setStats] = useState({
-        total_feedbacks: 0,
-        average_rating: 0,
-        responses_today: 0,
-    });
-
-    const [categoryFeedbackData, setCategoryFeedbackData] = useState([]);
-    const [categoryMetricData, setCategoryMetricData] = useState([]);
     const [sentimentTableData, setSentimentTableData] = useState({});
-    const [bar2YAxisMax, setBar2YAxisMax] = useState(5);
+    const [ratingTrends, setRatingTrends] = useState([]);
+    const [averageRating, setAverageRating] = useState(0);
+    const [responsesToday, setResponsesToday] = useState(0);
 
     useEffect(() => {
-        fetchDashboardData();
+        const fetchSentimentTable = async () => {
+            try {
+                const res = await axios.get(`${BACKEND_URL}/feedback/sentiment-table`);
+                setSentimentTableData(res.data || {});
+            } catch (err) {
+                console.error('Error fetching sentiment table:', err);
+            }
+        };
+
+        const fetchRatingTrends = async () => {
+            try {
+                const res = await axios.get(`${BACKEND_URL}/feedback/rating-trends`);
+                setRatingTrends(res.data || []);
+            } catch (err) {
+                console.error('Error fetching rating trends:', err);
+            }
+        };
+
+        const fetchStats = async () => {
+            try {
+                const res = await axios.get(`${BACKEND_URL}/feedback/summary`);
+                setAverageRating(parseFloat(res.data.averageRating) || 0);
+                setResponsesToday(parseInt(res.data.responsesToday) || 0);
+            } catch (err) {
+                console.error('Error fetching stats:', err);
+            }
+        };
+
+        fetchSentimentTable();
+        fetchRatingTrends();
+        fetchStats();
     }, []);
 
-    const fetchDashboardData = async () => {
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/feedback/analytics`);
-            const data = response.data;
-
-            const totalFeedbacks = data.total_feedbacks || 0;
-            const avgRating = parseFloat(data.average_rating) || 0;
-            const todayResponses = data.responses_today || 0;
-
-            setStats({
-                total_feedbacks: totalFeedbacks,
-                average_rating: avgRating,
-                responses_today: todayResponses,
-            });
-
-            const feedbackCounts = data.feedback_counts || [];
-            const totalRatings = data.total_ratings || [];
-
-            setCategoryFeedbackData(
-                CATEGORY.map((cat, index) => ({
-                    name: cat.charAt(0).toUpperCase() + cat.slice(1),
-                    feedback: feedbackCounts[index] || 0,
-                }))
-            );
-
-            setCategoryMetricData(
-                CATEGORY.map((cat, index) => ({
-                    name: cat.charAt(0).toUpperCase() + cat.slice(1),
-                    metric:
-                        feedbackCounts[index] > 0
-                            ? parseFloat((totalRatings[index] / feedbackCounts[index]).toFixed(1))
-                            : 0,
-                }))
-            );
-
-            const sentimentData = {};
-            CATEGORY.forEach(cat => sentimentData[cat] = { worst: 0, average: 0, excellent: 0 });
-
-            Object.values(data.table_breakdown || {}).forEach(tbl => {
-                CATEGORY.forEach(cat => {
-                    if (tbl[cat]) {
-                        sentimentData[cat].worst += tbl[cat].worst || 0;
-                        sentimentData[cat].average += tbl[cat].average || 0;
-                        sentimentData[cat].excellent += tbl[cat].excellent || 0;
-                    }
-                });
-            });
-
-            setSentimentTableData(sentimentData);
-
-            const maxMetric = Math.max(...feedbackCounts.map((_, i) => {
-                return feedbackCounts[i] > 0 ? totalRatings[i] / feedbackCounts[i] : 0;
-            })) + 1;
-
-            setBar2YAxisMax(maxMetric > 5 ? maxMetric : 5);
-
-        } catch (err) {
-            console.error('Error fetching analytics data:', err);
-        }
-    };
-
-    const sentimentLabels = SENTIMENT_STRING.reduce((acc, s) => {
-        acc[s.toLowerCase()] = s;
-        return acc;
-    }, {});
-
     return (
-        <div className="dashboard">
+        <div className="dashboard-container">
             <Sidebar />
-            <main className="main-content">
-                <div className="dashboard-header">
-                    <h1>Dashboard</h1>
-                    <p>Overview of customer feedback and insights</p>
-                </div>
+            <main className="dashboard-main">
+                <h1 className="dashboard-title">Dashboard</h1>
 
-                <div className="stats-grid">
-                    <div className="stat-card">
-                        <div className="stat-value">{stats.total_feedbacks}</div>
-                        <div className="stat-label">
-                            <MessageSquare size={16} /> Total Feedback
-                        </div>
+                <div className="dashboard-cards">
+                    <div className="card">
+                        <h3>Average Rating</h3>
+                        <p className="card-value">{averageRating.toFixed(1)} ★</p>
                     </div>
-                    <div className="stat-card">
-                        <div className="stat-value">{stats.average_rating.toFixed(1)}</div>
-                        <div className="stat-label">
-                            <Star size={16} /> Average Rating
-                        </div>
-                    </div>
-                    <div className="stat-card">
-                        <div className="stat-value">{stats.responses_today}</div>
-                        <div className="stat-label">
-                            <Users size={16} /> Responses Today
-                        </div>
+                    <div className="card">
+                        <h3>Responses Today</h3>
+                        <p className="card-value">{responsesToday}</p>
                     </div>
                 </div>
 
-                <div className="charts-row">
-                    <div className="chart-box">
-                        <h3>Feedback by Category</h3>
+                <div className="chart-section">
+                    <h3>Rating Trends by Category</h3>
+                    <div className="chart-wrapper">
                         <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={categoryFeedbackData}>
+                            <BarChart data={ratingTrends}>
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                                <YAxis />
+                                <XAxis dataKey="date" />
+                                <YAxis domain={[0, 5]} />
                                 <Tooltip />
-                                <Bar dataKey="feedback" fill="#8B4513" />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    <div className="chart-box">
-                        <h3>Average Rating by Category</h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={categoryMetricData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                                <YAxis domain={[0, bar2YAxisMax]} />
-                                <Tooltip />
-                                <Bar dataKey="metric" fill="#FFA500" />
+                                {CATEGORY.map((cat, index) => (
+                                    <Bar key={cat} dataKey={cat} fill={['#f87171', '#facc15', '#34d399', '#60a5fa'][index]} />
+                                ))}
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -150,50 +84,49 @@ const Dashboard = () => {
 
                 <div className="sentiment-section">
                     <h3>Feedback Sentiment by Category</h3>
-                    <table className="sentiment-table">
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                {Object.values(sentimentLabels).map(label => (
-                                    <th key={label}>{label}</th>
-                                ))}
-                                <th>Sentiment Score</th>
-                                <th>Visual</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {CATEGORY.map(cat => {
-                                const sent = sentimentTableData[cat] || {};
-                                const worst = sent.worst || 0;
-                                const avg = sent.average || 0;
-                                const exc = sent.excellent || 0;
-                                const total = worst + avg + exc || 1;
-                                const score = Math.round(((worst * 1 + avg * 2 + exc * 3) / total) / 3 * 100);
-                                const worstPct = (worst / total) * 100;
-                                const avgPct = (avg / total) * 100;
-                                const excPct = (exc / total) * 100;
+                    <div className="table-wrapper">
+                        <table className="sentiment-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    {Object.values(sentimentLabels).map(label => (
+                                        <th key={label}>{label}</th>
+                                    ))}
+                                    <th>Sentiment Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {CATEGORY.map(category => {
+                                    const sent = sentimentTableData[category] || {};
+                                    const worst = sent.worst || 0;
+                                    const avg = sent.average || 0;
+                                    const exc = sent.excellent || 0;
+                                    const total = worst + avg + exc;
+                                    const score = total === 0 ? 0 : Math.round(((worst * 1 + avg * 2 + exc * 3) / total) / 3 * 100);
+                                    const barColor = score < 40 ? '#f87171' : score < 70 ? '#facc15' : '#34d399';
 
-                                return (
-                                    <tr key={cat}>
-                                        <td>{cat.charAt(0).toUpperCase() + cat.slice(1)}</td>
-                                        <td>{worst}</td>
-                                        <td>{avg}</td>
-                                        <td>{exc}</td>
-                                        <td>{score}%</td>
-                                        <td style={{ width: "25%" }}>
-                                            <div style={{ display: "flex", height: "10px", width: "100%", borderRadius: "4px", overflow: "hidden", backgroundColor: "#e5e7eb" }}>
-                                                <div style={{ width: `${worstPct}%`, backgroundColor: "#ef4444" }}></div>
-                                                <div style={{ width: `${avgPct}%`, backgroundColor: "#facc15" }}></div>
-                                                <div style={{ width: `${excPct}%`, backgroundColor: "#10b981" }}></div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                    return (
+                                        <tr key={category}>
+                                            <td>{category.charAt(0).toUpperCase() + category.slice(1)}</td>
+                                            <td>{worst}</td>
+                                            <td>{avg}</td>
+                                            <td>{exc}</td>
+                                            <td>
+                                                <div className="progress-bar-container">
+                                                    <div
+                                                        className="progress-bar-fill"
+                                                        style={{ width: `${score}%`, backgroundColor: barColor }}
+                                                    ></div>
+                                                </div>
+                                                <div className="score-label">{score}%</div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
             </main>
         </div>
     );

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-import { Calendar, Download, Filter, TrendingUp, AlertCircle } from 'lucide-react';
+import { TrendingUp, AlertCircle } from 'lucide-react';
 import Sidebar from './Sidebar';
 import axios from 'axios';
 
@@ -63,6 +63,7 @@ const Reports = () => {
                     </div>
                 </div>
 
+                {/* Chart Section */}
                 <div className="chart-container">
                     <h3 className="chart-title">Rating Trends by Category</h3>
                     <ResponsiveContainer width="100%" height={300}>
@@ -82,6 +83,7 @@ const Reports = () => {
                     </ResponsiveContainer>
                 </div>
 
+                {/* Weekly Summary */}
                 <div className="card">
                     <div className="card-header">
                         <h3 className="card-title">Weekly Summary</h3>
@@ -111,6 +113,7 @@ const Reports = () => {
                     </div>
                 </div>
 
+                {/* Recommendations */}
                 <div className="card">
                     <div className="card-header">
                         <h3 className="card-title">

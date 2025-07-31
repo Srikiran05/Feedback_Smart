@@ -26,11 +26,14 @@ const Reports = () => {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`);
             const data = res.data;
 
-            const trends = data.feedback_counts.map((count, index) => ({
+            const feedbackCounts = Array.isArray(data.feedback_counts) ? data.feedback_counts : [];
+            const totalRatings = Array.isArray(data.total_ratings) ? data.total_ratings : [];
+
+            const trends = feedbackCounts.map((count, index) => ({
                 date: `Category ${index + 1}`,
                 rating:
-                    data.feedback_counts[index] > 0
-                        ? parseFloat((data.total_ratings[index] / data.feedback_counts[index]).toFixed(2))
+                    count > 0
+                        ? parseFloat((totalRatings[index] / count).toFixed(2))
                         : 0,
                 responses: count
             }));
@@ -38,9 +41,9 @@ const Reports = () => {
             setReportData({
                 trends,
                 summary: {
-                    totalFeedbacks: data.total_feedbacks,
-                    averageRating: parseFloat(data.average_rating).toFixed(1),
-                    responsesToday: data.responses_today,
+                    totalFeedbacks: data.total_feedbacks || 0,
+                    averageRating: parseFloat(data.average_rating || 0).toFixed(1),
+                    responsesToday: data.responses_today || 0,
                     actionItems: 3
                 }
             });

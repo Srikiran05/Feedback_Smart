@@ -5,7 +5,7 @@ import {
 import { Coffee, MessageSquare, Star, Users } from 'lucide-react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
-import { SENTIMENT_STRING, CATEGORY as CATEGORIES } from '../constants';
+import { CATEGORIES, SENTIMENT_STRING } from '../constants';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -27,22 +27,27 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`);
+            console.log('API Response:', response.data);
             const data = response.data;
 
             const totalFeedbacks = data.total_feedbacks || 0;
+            console.log('Total Feedbacks:', totalFeedbacks);
 
             setStats({
                 total_feedbacks: totalFeedbacks,
                 average_rating: parseFloat(data.average_rating) || 0,
                 responses_today: data.responses_today || 0,
             });
+            console.log('Stats Set:', stats);
 
+            // Ensure CATEGORIES matches backend order (ambience, cleanliness, taste, service, value)
             setCategoryFeedbackData(
                 CATEGORIES.map((cat, index) => ({
                     name: cat.charAt(0).toUpperCase() + cat.slice(1),
                     feedback: data.feedback_counts?.[index] || 0,
                 }))
             );
+            console.log('Category Feedback Data:', categoryFeedbackData);
 
             setCategoryMetricData(
                 CATEGORIES.map((cat, index) => ({
@@ -53,6 +58,7 @@ const Dashboard = () => {
                             : 0,
                 }))
             );
+            console.log('Category Metric Data:', categoryMetricData);
 
             const sentimentData = {};
             const mentionCounter = {};
@@ -79,6 +85,9 @@ const Dashboard = () => {
                 });
             });
 
+            console.log('Sentiment Data:', sentimentData);
+            console.log('Mention Counter:', mentionCounter);
+
             setSentimentTableData(sentimentData);
             setActualCategoryMentions(mentionCounter);
 
@@ -88,15 +97,14 @@ const Dashboard = () => {
                 }
                 return 0;
             })) + 1;
-
-            setBar2YAxisMax(bar2Max);
+            setBar2YAxisMax(bar2Max > 5 ? bar2Max : 5); // Ensure minimum range
         } catch (error) {
-            console.error('Error fetching dashboard data:', error.message);
+            console.error('Error fetching dashboard data:', error.message, error.stack);
         }
     };
 
     const sentimentLabels = SENTIMENT_STRING.reduce((acc, sentiment) => {
-        acc[sentiment.toLowerCase()] = sentiment;
+        acc[sentiment.toLowerCase()] = sentiment.charAt(0).toUpperCase() + sentiment.slice(1);
         return acc;
     }, {});
 
@@ -136,30 +144,38 @@ const Dashboard = () => {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
-                    <div className="chart-container">
+                    <div className="chart-container" style={{ minWidth: '400px', minHeight: '300px' }}>
                         <h3 className="chart-title">Feedback by Category (Bar_1)</h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={categoryFeedbackData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                                <YAxis />
-                                <Tooltip />
-                                <Bar dataKey="feedback" fill="var(--primary-brown)" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {categoryFeedbackData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={categoryFeedbackData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Bar dataKey="feedback" fill="var(--primary-brown)" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p>No data available for Bar_1</p>
+                        )}
                     </div>
 
-                    <div className="chart-container">
+                    <div className="chart-container" style={{ minWidth: '400px', minHeight: '300px' }}>
                         <h3 className="chart-title">Average Rating by Category (Bar_2)</h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={categoryMetricData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                                <YAxis domain={[0, bar2YAxisMax]} />
-                                <Tooltip />
-                                <Bar dataKey="metric" fill="var(--accent-orange)" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {categoryMetricData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={categoryMetricData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                                    <YAxis domain={[0, bar2YAxisMax]} />
+                                    <Tooltip />
+                                    <Bar dataKey="metric" fill="var(--accent-orange)" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p>No data available for Bar_2</p>
+                        )}
                     </div>
                 </div>
 
@@ -180,53 +196,57 @@ const Dashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {Object.keys(sentimentTableData).map((category) => {
-                                    const data = sentimentTableData[category];
-                                    const excellent = data.excellent || 0;
-                                    const average = data.average || 0;
-                                    const worst = data.worst || 0;
-                                    const total = excellent + average + worst || 1;
+                                {Object.keys(sentimentTableData).length > 0 ? (
+                                    Object.keys(sentimentTableData).map((category) => {
+                                        const data = sentimentTableData[category];
+                                        const excellent = data.excellent || 0;
+                                        const average = data.average || 0;
+                                        const worst = data.worst || 0;
+                                        const total = excellent + average + worst || 1;
 
-                                    const weightedScore =
-                                        ((worst * 1) + (average * 2) + (excellent * 3)) / total;
-                                    const positivePct = Math.round((weightedScore / 3) * 100);
+                                        const weightedScore =
+                                            ((worst * 1) + (average * 2) + (excellent * 3)) / total;
+                                        const positivePct = Math.round((weightedScore / 3) * 100);
 
-                                    let barColor = 'var(--danger-red)';
-                                    if (positivePct >= 65) barColor = 'var(--success-green)';
-                                    else if (positivePct >= 45) barColor = 'var(--warning-yellow)';
+                                        let barColor = 'var(--danger-red)';
+                                        if (positivePct >= 65) barColor = 'var(--success-green)';
+                                        else if (positivePct >= 45) barColor = 'var(--warning-yellow)';
 
-                                    return (
-                                        <tr key={category}>
-                                            <td>{category.charAt(0).toUpperCase() + category.slice(1)}</td>
-                                            {Object.keys(sentimentLabels).map((sentiment) => (
-                                                <td key={sentiment}>
-                                                    {sentimentTableData[category]?.[sentiment] ?? 0}
+                                        return (
+                                            <tr key={category}>
+                                                <td>{category.charAt(0).toUpperCase() + category.slice(1)}</td>
+                                                {Object.keys(sentimentLabels).map((sentiment) => (
+                                                    <td key={sentiment}>
+                                                        {sentimentTableData[category]?.[sentiment] ?? 0}
+                                                    </td>
+                                                ))}
+                                                <td>
+                                                    <div style={{
+                                                        width: '100%',
+                                                        background: '#eee',
+                                                        borderRadius: '4px',
+                                                        overflow: 'hidden',
+                                                        height: '12px',
+                                                        position: 'relative'
+                                                    }}>
+                                                        <div
+                                                            style={{
+                                                                width: `${positivePct}%`,
+                                                                backgroundColor: barColor,
+                                                                height: '100%'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.25rem' }}>
+                                                        {positivePct}%
+                                                    </div>
                                                 </td>
-                                            ))}
-                                            <td>
-                                                <div style={{
-                                                    width: '100%',
-                                                    background: '#eee',
-                                                    borderRadius: '4px',
-                                                    overflow: 'hidden',
-                                                    height: '12px',
-                                                    position: 'relative'
-                                                }}>
-                                                    <div
-                                                        style={{
-                                                            width: `${positivePct}%`,
-                                                            backgroundColor: barColor,
-                                                            height: '100%'
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.25rem' }}>
-                                                    {positivePct}%
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
+                                    <tr><td colSpan={4}>No sentiment data available</td></tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

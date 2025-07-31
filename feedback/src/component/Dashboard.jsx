@@ -129,7 +129,7 @@ const Dashboard = () => {
                                 <XAxis dataKey="name" angle={-45} textAnchor="end" height={50} />
                                 <YAxis />
                                 <Tooltip />
-                                <Bar dataKey="feedback" fill="#8B4513" barSize={25} />
+                                <Bar dataKey="feedback" fill="#8B4513" barSize={65} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -139,7 +139,7 @@ const Dashboard = () => {
                         <ResponsiveContainer width="70%" height={300}>
                             <BarChart data={categoryMetricData}>
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} barSize={65} />
                                 <YAxis domain={[0, bar2YAxisMax]} />
                                 <Tooltip />
                                 <Bar dataKey="metric" fill="#FFA500" />

@@ -184,11 +184,9 @@ const Dashboard = () => {
                                     />
                                     <Bar
                                         dataKey="feedback"
-                                        fill="#8B4513"
+                                        fill="#3b82f6"
                                         radius={[4, 4, 0, 0]}
-                                        stroke="#7c3f0f"
-                                        strokeWidth={1}
-                                        maxBarSize={40}
+                                        maxBarSize={35}
                                     />
                                 </BarChart>
                             </ResponsiveContainer>
@@ -227,11 +225,9 @@ const Dashboard = () => {
                                     />
                                     <Bar
                                         dataKey="metric"
-                                        fill="#FFA500"
+                                        fill="#f59e0b"
                                         radius={[4, 4, 0, 0]}
-                                        stroke="#e6940a"
-                                        strokeWidth={1}
-                                        maxBarSize={40}
+                                        maxBarSize={35}
                                     />
                                 </BarChart>
                             </ResponsiveContainer>
@@ -253,7 +249,7 @@ const Dashboard = () => {
                                     <th className="text-left py-3 px-4 font-semibold text-gray-900 bg-gray-50 rounded-tl-lg">
                                         Category
                                     </th>
-                                    {Object.values(sentimentLabels).map((label, index) => (
+                                    {Object.values(sentimentLabels).map((label) => (
                                         <th key={label} className="text-center py-3 px-4 font-semibold text-gray-900 bg-gray-50">
                                             {label}
                                         </th>

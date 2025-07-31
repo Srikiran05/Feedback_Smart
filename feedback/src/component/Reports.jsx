@@ -6,6 +6,8 @@ import { TrendingUp, AlertCircle } from 'lucide-react';
 import Sidebar from './Sidebar';
 import axios from 'axios';
 
+const CATEGORY = ['ambience', 'cleanliness', 'taste', 'service', 'value'];
+
 const Reports = () => {
     const [reportData, setReportData] = useState({
         trends: [],
@@ -23,27 +25,46 @@ const Reports = () => {
 
     const fetchAnalyticsData = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/feedback/analytics`);
             const data = res.data;
 
-            const feedbackCounts = Array.isArray(data.feedback_counts) ? data.feedback_counts : [];
-            const totalRatings = Array.isArray(data.total_ratings) ? data.total_ratings : [];
+            const tableBreakdown = data.table_breakdown || {};
+            const responsesToday = data.responses_today || 0;
+            const averageRating = parseFloat(data.average_rating || 0).toFixed(1);
 
-            const trends = feedbackCounts.map((count, index) => ({
-                date: `Category ${index + 1}`,
-                rating:
-                    count > 0
-                        ? parseFloat((totalRatings[index] / count).toFixed(2))
-                        : 0,
-                responses: count
-            }));
+            const categoryTotals = CATEGORY.map((cat, idx) => {
+                let totalResponses = 0;
+                let totalScore = 0;
+
+                Object.values(tableBreakdown).forEach(table => {
+                    const feedback = table[cat];
+                    if (feedback) {
+                        const worst = feedback.worst || 0;
+                        const average = feedback.average || 0;
+                        const excellent = feedback.excellent || 0;
+                        const responses = worst + average + excellent;
+                        const score = worst * 1 + average * 2 + excellent * 3;
+
+                        totalResponses += responses;
+                        totalScore += score;
+                    }
+                });
+
+                return {
+                    date: `Category ${idx + 1}`,
+                    rating: totalResponses ? parseFloat((totalScore / totalResponses).toFixed(2)) : 0,
+                    responses: totalResponses
+                };
+            });
+
+            const totalFeedbacks = categoryTotals.reduce((sum, c) => sum + c.responses, 0);
 
             setReportData({
-                trends,
+                trends: categoryTotals,
                 summary: {
-                    totalFeedbacks: data.total_feedbacks || 0,
-                    averageRating: parseFloat(data.average_rating || 0).toFixed(1),
-                    responsesToday: data.responses_today || 0,
+                    totalFeedbacks,
+                    averageRating,
+                    responsesToday,
                     actionItems: 3
                 }
             });
@@ -135,7 +156,7 @@ const Reports = () => {
                             >
                                 <strong>Improve service speed during lunch hours</strong>
                                 <p style={{ margin: '0.5rem 0' }}>
-                                    Customers are rating below 4. Consider increasing staff between 12-2 PM.
+                                    Customers are rating below 4. Consider increasing staff between 12–2 PM.
                                 </p>
                                 <p style={{ fontStyle: 'italic', fontSize: '0.85rem', color: 'var(--success-green)' }}>
                                     <TrendingUp size={14} style={{ marginRight: '0.3rem' }} />

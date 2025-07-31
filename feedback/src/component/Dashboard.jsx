@@ -91,109 +91,259 @@ const Dashboard = () => {
     }, {});
 
     return (
-        <div className="dashboard">
+        <div className="flex min-h-screen bg-gray-50">
             <Sidebar />
-            <main className="main-content">
-                <div className="dashboard-header">
-                    <h1>Dashboard</h1>
-                    <p>Overview of customer feedback and insights</p>
+            <main className="flex-1 p-8 ml-64">
+                {/* Dashboard Header */}
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+                    <p className="text-gray-600">Overview of customer feedback and insights</p>
                 </div>
 
-                <div className="stats-grid">
-                    <div className="stat-card">
-                        <div className="stat-value">{stats.total_feedbacks}</div>
-                        <div className="stat-label">
-                            <MessageSquare size={16} /> Total Feedback
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <div className="text-2xl font-bold text-gray-900 mb-1">
+                                    {stats.total_feedbacks}
+                                </div>
+                                <div className="text-sm text-gray-600 flex items-center gap-2">
+                                    <MessageSquare size={16} className="text-blue-500" />
+                                    Total Feedback
+                                </div>
+                            </div>
+                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <MessageSquare size={24} className="text-blue-600" />
+                            </div>
                         </div>
                     </div>
-                    <div className="stat-card">
-                        <div className="stat-value">{stats.average_rating.toFixed(1)}</div>
-                        <div className="stat-label">
-                            <Star size={16} /> Average Rating
+
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <div className="text-2xl font-bold text-gray-900 mb-1">
+                                    {stats.average_rating.toFixed(1)}
+                                </div>
+                                <div className="text-sm text-gray-600 flex items-center gap-2">
+                                    <Star size={16} className="text-yellow-500" />
+                                    Average Rating
+                                </div>
+                            </div>
+                            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <Star size={24} className="text-yellow-600" />
+                            </div>
                         </div>
                     </div>
-                    <div className="stat-card">
-                        <div className="stat-value">{stats.responses_today}</div>
-                        <div className="stat-label">
-                            <Users size={16} /> Responses Today
+
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <div className="text-2xl font-bold text-gray-900 mb-1">
+                                    {stats.responses_today}
+                                </div>
+                                <div className="text-sm text-gray-600 flex items-center gap-2">
+                                    <Users size={16} className="text-green-500" />
+                                    Responses Today
+                                </div>
+                            </div>
+                            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <Users size={24} className="text-green-600" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="charts-row">
-                    <div className="chart-box">
-                        <h3>Feedback by Category</h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={categoryFeedbackData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                                <YAxis />
-                                <Tooltip />
-                                <Bar dataKey="feedback" fill="#8B4513" />
-                            </BarChart>
-                        </ResponsiveContainer>
+                {/* Charts Section */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Feedback by Category</h3>
+                            <p className="text-sm text-gray-600">Total number of feedback responses per category</p>
+                        </div>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={categoryFeedbackData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                    <XAxis
+                                        dataKey="name"
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={80}
+                                        fontSize={12}
+                                        stroke="#64748b"
+                                    />
+                                    <YAxis fontSize={12} stroke="#64748b" />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: '1px solid #e2e8f0',
+                                            borderRadius: '8px',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                    />
+                                    <Bar
+                                        dataKey="feedback"
+                                        fill="#8B4513"
+                                        radius={[4, 4, 0, 0]}
+                                        stroke="#7c3f0f"
+                                        strokeWidth={1}
+                                        maxBarSize={40}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
 
-                    <div className="chart-box">
-                        <h3>Average Rating by Category</h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={categoryMetricData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                                <YAxis domain={[0, bar2YAxisMax]} />
-                                <Tooltip />
-                                <Bar dataKey="metric" fill="#FFA500" />
-                            </BarChart>
-                        </ResponsiveContainer>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-1">Average Rating by Category</h3>
+                            <p className="text-sm text-gray-600">Mean rating score for each feedback category</p>
+                        </div>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={categoryMetricData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                    <XAxis
+                                        dataKey="name"
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={80}
+                                        fontSize={12}
+                                        stroke="#64748b"
+                                    />
+                                    <YAxis
+                                        domain={[0, bar2YAxisMax]}
+                                        fontSize={12}
+                                        stroke="#64748b"
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: '1px solid #e2e8f0',
+                                            borderRadius: '8px',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                    />
+                                    <Bar
+                                        dataKey="metric"
+                                        fill="#FFA500"
+                                        radius={[4, 4, 0, 0]}
+                                        stroke="#e6940a"
+                                        strokeWidth={1}
+                                        maxBarSize={40}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
 
-                <div className="sentiment-section">
-                    <h3>Feedback Sentiment by Category</h3>
-                    <table className="sentiment-table">
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                {Object.values(sentimentLabels).map(label => (
-                                    <th key={label}>{label}</th>
-                                ))}
-                                <th>Sentiment Score</th>
-                                <th>Visual</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {CATEGORY.map(cat => {
-                                const sent = sentimentTableData[cat] || {};
-                                const worst = sent.worst || 0;
-                                const avg = sent.average || 0;
-                                const exc = sent.excellent || 0;
-                                const total = worst + avg + exc || 1;
-                                const score = Math.round(((worst * 1 + avg * 2 + exc * 3) / total) / 3 * 100);
-                                const worstPct = (worst / total) * 100;
-                                const avgPct = (avg / total) * 100;
-                                const excPct = (exc / total) * 100;
+                {/* Sentiment Analysis Table */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Feedback Sentiment by Category</h3>
+                        <p className="text-sm text-gray-600">Detailed breakdown of sentiment analysis across all categories</p>
+                    </div>
 
-                                return (
-                                    <tr key={cat}>
-                                        <td>{cat.charAt(0).toUpperCase() + cat.slice(1)}</td>
-                                        <td>{worst}</td>
-                                        <td>{avg}</td>
-                                        <td>{exc}</td>
-                                        <td>{score}%</td>
-                                        <td style={{ width: "25%" }}>
-                                            <div style={{ display: "flex", height: "10px", width: "100%", borderRadius: "4px", overflow: "hidden", backgroundColor: "#e5e7eb" }}>
-                                                <div style={{ width: `${worstPct}%`, backgroundColor: "#ef4444" }}></div>
-                                                <div style={{ width: `${avgPct}%`, backgroundColor: "#facc15" }}></div>
-                                                <div style={{ width: `${excPct}%`, backgroundColor: "#10b981" }}></div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-gray-200">
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-900 bg-gray-50 rounded-tl-lg">
+                                        Category
+                                    </th>
+                                    {Object.values(sentimentLabels).map((label, index) => (
+                                        <th key={label} className="text-center py-3 px-4 font-semibold text-gray-900 bg-gray-50">
+                                            {label}
+                                        </th>
+                                    ))}
+                                    <th className="text-center py-3 px-4 font-semibold text-gray-900 bg-gray-50">
+                                        Sentiment Score
+                                    </th>
+                                    <th className="text-center py-3 px-4 font-semibold text-gray-900 bg-gray-50 rounded-tr-lg">
+                                        Distribution
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {CATEGORY.map((cat, categoryIndex) => {
+                                    const sent = sentimentTableData[cat] || {};
+                                    const worst = sent.worst || 0;
+                                    const avg = sent.average || 0;
+                                    const exc = sent.excellent || 0;
+                                    const total = worst + avg + exc || 1;
+                                    const score = Math.round(((worst * 1 + avg * 2 + exc * 3) / total) / 3 * 100);
+                                    const worstPct = (worst / total) * 100;
+                                    const avgPct = (avg / total) * 100;
+                                    const excPct = (exc / total) * 100;
+
+                                    return (
+                                        <tr
+                                            key={cat}
+                                            className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${categoryIndex === CATEGORY.length - 1 ? 'border-b-0' : ''
+                                                }`}
+                                        >
+                                            <td className="py-4 px-4 font-medium text-gray-900">
+                                                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                            </td>
+                                            <td className="py-4 px-4 text-center">
+                                                <span className="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                                                    {worst}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4 text-center">
+                                                <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                                                    {avg}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4 text-center">
+                                                <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                                    {exc}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4 text-center">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${score >= 80 ? 'bg-green-100 text-green-800' :
+                                                        score >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-red-100 text-red-800'
+                                                    }`}>
+                                                    {score}%
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                <div className="w-full max-w-32 mx-auto">
+                                                    <div className="flex h-3 bg-gray-200 rounded-full overflow-hidden">
+                                                        {worstPct > 0 && (
+                                                            <div
+                                                                className="bg-red-500 transition-all duration-300"
+                                                                style={{ width: `${worstPct}%` }}
+                                                                title={`Worst: ${worstPct.toFixed(1)}%`}
+                                                            />
+                                                        )}
+                                                        {avgPct > 0 && (
+                                                            <div
+                                                                className="bg-yellow-500 transition-all duration-300"
+                                                                style={{ width: `${avgPct}%` }}
+                                                                title={`Average: ${avgPct.toFixed(1)}%`}
+                                                            />
+                                                        )}
+                                                        {excPct > 0 && (
+                                                            <div
+                                                                className="bg-green-500 transition-all duration-300"
+                                                                style={{ width: `${excPct}%` }}
+                                                                title={`Excellent: ${excPct.toFixed(1)}%`}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
             </main>
         </div>
     );

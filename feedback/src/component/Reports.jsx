@@ -1,185 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts';
-import { Calendar, Download, Filter, TrendingUp, AlertCircle } from 'lucide-react';
-import Sidebar from './Sidebar';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const Reports = () => {
-    const [reportData, setReportData] = useState({
-        trends: [],
-        summary: {
-            totalFeedbacks: 0,
-            averageRating: 0,
-            responsesToday: 0,
-            actionItems: 3
-        }
-    });
+    const [analytics, setAnalytics] = useState(null);
 
     useEffect(() => {
-        fetchAnalyticsData();
+        const fetchAnalytics = async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/feedback/analytics`);
+                console.log('Analytics Data:', res.data); // Debug: verify response
+                setAnalytics(res.data);
+            } catch (error) {
+                console.error('Error fetching analytics:', error);
+            }
+        };
+
+        fetchAnalytics();
     }, []);
 
-    const fetchAnalyticsData = async () => {
-        try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/analytics`);
-            const data = res.data;
-
-            const trends = data.feedback_counts.map((count, index) => ({
-                date: `Category ${index + 1}`,
-                rating:
-                    data.feedback_counts[index] > 0
-                        ? parseFloat((data.total_ratings[index] / data.feedback_counts[index]).toFixed(2))
-                        : 0,
-                responses: count
-            }));
-
-            setReportData({
-                trends,
-                summary: {
-                    totalFeedbacks: data.total_feedbacks,
-                    averageRating: parseFloat(data.average_rating).toFixed(1),
-                    responsesToday: data.responses_today,
-                    actionItems: 3
-                }
-            });
-        } catch (error) {
-            console.error('Error loading report data:', error.message);
-        }
-    };
+    if (!analytics) return <div className="p-4">Loading analytics...</div>;
 
     return (
-        <div className="dashboard">
-            <Sidebar />
-            <main className="main-content">
-                <div className="dashboard-header">
-                    <div>
-                        <h1>Weekly Reports</h1>
-                        <p>Real-time analytics and summary</p>
-                    </div>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    </div>
+        <div className="p-4">
+            <h2 className="text-xl font-bold mb-4">Feedback Analytics</h2>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white p-4 rounded shadow">
+                    <h3 className="font-semibold">Total Feedbacks</h3>
+                    <p>{analytics.total_feedbacks}</p>
                 </div>
-
-                <div className="chart-container">
-                    <h3 className="chart-title">Rating Trends by Category</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={reportData.trends}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis domain={[1, 5]} />
-                            <Tooltip />
-                            <Line
-                                type="monotone"
-                                dataKey="rating"
-                                stroke="var(--primary-brown)"
-                                strokeWidth={3}
-                                dot={{ fill: 'var(--accent-orange)', strokeWidth: 2, r: 6 }}
-                            />
-                        </LineChart>
-                    </ResponsiveContainer>
+                <div className="bg-white p-4 rounded shadow">
+                    <h3 className="font-semibold">Average Rating</h3>
+                    <p>{analytics.average_rating}</p>
                 </div>
-
-                <div className="card">
-                    <div className="card-header">
-                        <h3 className="card-title">Weekly Summary</h3>
-                        <p>Real-time performance indicators</p>
-                    </div>
-
-                    <div className="stats-grid">
-                        <div className="stat-card">
-                            <div className="stat-value">{reportData.summary.averageRating}</div>
-                            <div className="stat-label">Average Rating</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-value">{reportData.summary.totalFeedbacks}</div>
-                            <div className="stat-label">Total Feedbacks</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-value">{reportData.summary.responsesToday}</div>
-                            <div className="stat-label">Responses Today</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-value">{reportData.summary.actionItems}</div>
-                            <div className="stat-label">Action Items</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--warning-yellow)' }}>
-                                1 high priority
-                            </div>
-                        </div>
-                    </div>
+                <div className="bg-white p-4 rounded shadow">
+                    <h3 className="font-semibold">Responses Today</h3>
+                    <p>{analytics.responses_today}</p>
                 </div>
+            </div>
 
-                <div className="card">
-                    <div className="card-header">
-                        <h3 className="card-title">
-                            <AlertCircle size={20} style={{ display: 'inline', marginRight: '0.5rem' }} />
-                            Actionable Recommendations
-                        </h3>
-                        <p>Smart suggestions based on real-time feedback trends</p>
-                    </div>
+            <h3 className="text-lg font-semibold mt-6 mb-2">Recent Feedbacks</h3>
+            <ul className="bg-white p-4 rounded shadow space-y-2">
+                {analytics.recent_feedbacks.map((fb, idx) => (
+                    <li key={idx} className="border-b pb-2">
+                        <div className="font-medium">Table {fb.tableName}</div>
+                        <div className="text-sm">{fb.feedback}</div>
+                        <div className="text-xs text-gray-500">{new Date(fb.createdAt).toLocaleString()}</div>
+                    </li>
+                ))}
+            </ul>
 
-                    <div style={{ padding: '1rem' }}>
-                        {reportData.summary.averageRating < 4 && (
-                            <div
-                                style={{
-                                    marginBottom: '1rem',
-                                    padding: '1rem',
-                                    borderLeft: '4px solid var(--danger-red)',
-                                    backgroundColor: 'var(--warm-white)',
-                                }}
-                            >
-                                <strong>Improve service speed during lunch hours</strong>
-                                <p style={{ margin: '0.5rem 0' }}>
-                                    Customers are rating below 4. Consider increasing staff between 12-2 PM.
-                                </p>
-                                <p style={{ fontStyle: 'italic', fontSize: '0.85rem', color: 'var(--success-green)' }}>
-                                    <TrendingUp size={14} style={{ marginRight: '0.3rem' }} />
-                                    Could boost ratings by 0.3 points
-                                </p>
-                            </div>
+            <h3 className="text-lg font-semibold mt-6 mb-2">Table Breakdown</h3>
+            <div className="overflow-auto">
+                <table className="w-full bg-white rounded shadow">
+                    <thead>
+                        <tr>
+                            <th className="p-2 border">Table</th>
+                            <th className="p-2 border">Service</th>
+                            <th className="p-2 border">Worst</th>
+                            <th className="p-2 border">Average</th>
+                            <th className="p-2 border">Excellent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.entries(analytics.table_breakdown).map(([table, services], i) =>
+                            Object.entries(services).map(([service, ratings], j) => (
+                                <tr key={`${i}-${j}`}>
+                                    <td className="p-2 border">{j === 0 ? table : ''}</td>
+                                    <td className="p-2 border">{service}</td>
+                                    <td className="p-2 border">{ratings.worst}</td>
+                                    <td className="p-2 border">{ratings.average}</td>
+                                    <td className="p-2 border">{ratings.excellent}</td>
+                                </tr>
+                            ))
                         )}
-
-                        {reportData.summary.responsesToday < 10 && (
-                            <div
-                                style={{
-                                    marginBottom: '1rem',
-                                    padding: '1rem',
-                                    borderLeft: '4px solid var(--warning-yellow)',
-                                    backgroundColor: 'var(--warm-white)',
-                                }}
-                            >
-                                <strong>Low participation today</strong>
-                                <p style={{ margin: '0.5rem 0' }}>
-                                    Only {reportData.summary.responsesToday} responses received. Push for more feedback.
-                                </p>
-                                <p style={{ fontStyle: 'italic', fontSize: '0.85rem', color: 'var(--text-light)' }}>
-                                    Try incentives or reminders
-                                </p>
-                            </div>
-                        )}
-
-                        {reportData.summary.totalFeedbacks > 50 && (
-                            <div
-                                style={{
-                                    marginBottom: '1rem',
-                                    padding: '1rem',
-                                    borderLeft: '4px solid var(--success-green)',
-                                    backgroundColor: 'var(--warm-white)',
-                                }}
-                            >
-                                <strong>Consistent engagement</strong>
-                                <p style={{ margin: '0.5rem 0' }}>
-                                    You’ve received over 50 feedback entries. Good sign of regular interaction.
-                                </p>
-                                <p style={{ fontStyle: 'italic', fontSize: '0.85rem', color: 'var(--success-green)' }}>
-                                    Keep maintaining service quality
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </main>
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
